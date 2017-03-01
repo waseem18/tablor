@@ -1,0 +1,12 @@
+{
+  "name": "tablor",
+  "version": "0.0.1",
+  "description": "Project under heavy development! ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {"xlsx":"0.8.5"},
+  "author": "Wasim Thabraze (https://github.com/waseem18)",
+  "license": "MIT"
+}

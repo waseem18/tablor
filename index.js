@@ -6,6 +6,7 @@ var utils = require('./utils.js')
 var lengthCheck = utils.lengthCheck;
 var getRowDimension = utils.getRowDimension;
 var getHeaderDimension = utils.getHeaderDimension;
+var tablify = utils.tablify;
 
 
 function Tablor(options) {
@@ -14,12 +15,14 @@ function Tablor(options) {
   var row_data = options.row_data || []
   var row_dimension = null;
   var header_dimension = null;
+  this.table_height = 0;
   //Given row_data without headers.
   if(headers.length==0 && row_data.length) {
     if (lengthCheck(row_data)) {
       this.headers = headers;
       this.row_data = row_data;
       this.row_dimension = row_data[0].length
+      this.table_height = this.table_height+row_data.length;
     }
     else {throw new Error('Length of rows are not same!')}
   }
@@ -31,6 +34,7 @@ function Tablor(options) {
       this.row_data = row_data;
       this.row_dimension = xd;
       this.header_dimension = headers.length;
+      this.table_height =this.table_height+ row_data.length;
     }
     else {throw new Error('Length of one/more rows is not same as number of headers!')}
   }
@@ -65,6 +69,8 @@ Tablor.prototype.setHeaders = function (headers=[]) {
 
 Tablor.prototype.addRow = function (row) {
   //row can be added with or without headers!
+  //console.log(this.table_height);
+  this.table_height = this.table_height+1;
   if(this.row_dimension) {
     //if data is already set!
     if(row.length == this.row_dimension) {
@@ -89,14 +95,24 @@ Tablor.prototype.addRow = function (row) {
 };
 
 
-Tablor.prototype.table = function () {
+Tablor.prototype.addColumn = function (column_data,header="") {
+};
+
+
+Tablor.prototype._table = function () {
   var complete_table = [];
-  complete_table.push(this.headers);
+  // var cli_table = "";
+  if(this.header_dimension) {
+    complete_table.push(this.headers);
+  }
   for(var i in this.row_data){
     complete_table.push(this.row_data[i]);
   }
+
+  // return tablify(complete_table,this.header_dimension);
   return complete_table
 };
+
 
 Tablor.prototype.json = function () {
   //This should actually output a list of dictionaries.
@@ -214,8 +230,8 @@ Tablor.prototype.getRow = function(row_number) {
 
 Tablor.prototype.getColumn = function(column_number) {
   var output = [];
-  if(column_number>=0 && column_number<this.headers.length){
-    var complete_table = this.table();
+  if(column_number>=0 && column_number<this.row_data.length){
+    var complete_table = this._table();
     for(var i in complete_table) {
       output.push(complete_table[i][column_number]);
     }
@@ -225,6 +241,24 @@ Tablor.prototype.getColumn = function(column_number) {
     throw new Error("No column with that column given is available!")
   }
 }
+
+
+Tablor.prototype.getElement = function (row_number,column_number) {
+  if(row_number>=0 && row_number<this.row_data.length && column_number>=0 && column_number<this.row_data.length){
+    var complete_table = this._table();
+    if(this.header_dimension){
+      //don't consider the header a part of the table.
+      return complete_table[row_number+1][column_number];
+    }
+    else{
+      //console.log(complete_table[row_number]);
+      return complete_table[row_number][column_number];
+    }
+  }
+  else {
+    throw new Error("Given row or column number bigger than table dimension, kindly check!")
+  }
+};
 
 
 
